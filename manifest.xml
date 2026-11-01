@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" 
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+           xsi:type="MailApp">
+  <Id>12345678-abcd-ef01-2345-6789abcdef01</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Min Organisation</ProviderName>
+  <DefaultLocale>sv-SE</DefaultLocale>
+  <DisplayName DefaultValue="Språkanpassad Signatur"/>
+  <Description DefaultValue="Byter signatur baserat på språk."/>
+  <Hosts>
+    <Host xsi:type="Mailbox"/>
+  </Hosts>
+  <Requirements>
+    <Sets>
+      <Set Name="MailBox" MinVersion="1.1"/>
+    </Sets>
+  </Requirements>
+  <FormSettings>
+    <Form xsi:type="ItemReadOrEdit">
+      <DesktopSettings>
+        <!-- Byt ut länken nedan mot din publika GitHub-länk -->
+        <SourceLocation DefaultValue="https://dittanvandarnamn.github.io/ditt-repo/index.html"/>
+      </DesktopSettings>
+    </Form>
+  </FormSettings>
+  <Permissions>ReadWriteMailbox</Permissions>
+</OfficeApp>

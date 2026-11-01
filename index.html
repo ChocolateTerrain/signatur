@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <title>Språkanpassad Signatur</title>
+    <!-- Office.js bibliotek -->
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 16px;
+            background-color: #f3f2f1;
+            color: #323130;
+        }
+        .card {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 { font-size: 16px; margin-top: 0; color: #0078d4; }
+        button {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            font-size: 14px;
+            border-radius: 2px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #106ebe; }
+        #status {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #605e5c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Språkanpassad Signatur</h2>
+        <p style="font-size: 13px;">Klicka på knappen för att detektera språk i mejlet och infoga rätt signatur.</p>
+        <button onclick="insertSignature()">Detektera & Infoga Signatur</button>
+        <div id="status">Redo.</div>
+    </div>
+
+    <script>
+        Office.onReady((info) => {
+            if (info.host === Office.HostType.Outlook) {
+                document.getElementById('status').innerText = "Kopplad till Outlook!";
+            }
+        });
+
+        // Dina anpassade signaturer
+        const swedishSignature = `
+            <br><br>
+            Med vänlig hälsning / Best regards,<br>
+            <strong>[Ditt Förnamn] [Ditt Efternamn]</strong><br>
+            [Din Titel] | [Företag]<br>
+            Tel: +46 70 123 45 67
+        `;
+
+        const englishSignature = `
+            <br><br>
+            Best regards,<br>
+            <strong>[First Name] [Last Name]</strong><br>
+            [Your Title] | [Company]<br>
+            Phone: +46 70 123 45 67
+        `;
+
+        function insertSignature() {
+            Office.context.mailbox.item.body.getAsync(Office.CoercionType.Html, function (result) {
+                if (result.status === Office.AsyncResultStatus.Succeeded) {
+                    const text = result.value.toLowerCase();
+                    const isEnglish = detectLanguage(text);
+
+                    const signatureToInsert = isEnglish ? englishSignature : swedishSignature;
+                    const langName = isEnglish ? "Engelska" : "Svenska";
+
+                    Office.context.mailbox.item.body.setSelectedDataAsync(signatureToInsert, { coercionType: Office.CoercionType.Html }, function (asyncResult) {
+                        if (asyncResult.status === Office.AsyncResultStatus.Succeeded) {
+                            document.getElementById('status').innerText = `Signatur infogad (${langName})!`;
+                        } else {
+                            document.getElementById('status').innerText = "Kunde inte infoga signaturen.";
+                        }
+                    });
+                } else {
+                    document.getElementById('status').innerText = "Kunde inte läsa mejltexten.";
+                }
+            });
+        }
+
+        function detectLanguage(text) {
+            if (text.includes("å") || text.includes("ä") || text.includes("ö")) {
+                return false; // Svenska tecken tyder på svenska
+            }
+
+            const englishWords = ["the", "and", "that", "have", "for", "not", "with", "you", "this", "but", "from", "they", "we", "would", "there"];
+            const swedishWords = ["och", "det", "att", "i", "en", "jag", "som", "med", "på", "den", "var", "för", "så", "till", "är", "men", "ett"];
+
+            let engCount = 0;
+            let sweCount = 0;
+
+            const words = text.split(/\W+/);
+            for (const word of words) {
+                if (englishWords.includes(word)) engCount++;
+                if (swedishWords.includes(word)) sweCount++;
+            }
+
+            return engCount > sweCount;
+        }
+    </script>
+</body>
+</html>
